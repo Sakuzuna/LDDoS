@@ -17,6 +17,35 @@
             <input type="text" id="delay" name="delay" placeholder="200 or Z for no delay" required>
             <label for="kbSize">KB per Request:</label>
             <input type="number" id="kbSize" name="kbSize" placeholder="1" required>
+            <label for="method">Attack Method:</label>
+            <select id="method" name="method" required>
+                <option value="CFB">CloudFlare Bypass</option>
+                <option value="BYPASS">Bypass Normal AntiDDoS</option>
+                <option value="GET">GET Flood</option>
+                <option value="POST">POST Flood</option>
+                <option value="OVH">OVH Bypass</option>
+                <option value="STRESS">STRESS</option>
+                <option value="DYN">DYN</option>
+                <option value="SLOW">Slowloris</option>
+                <option value="HEAD">HEAD</option>
+                <option value="NULL">NULL</option>
+                <option value="COOKIE">COOKIE</option>
+                <option value="PPS">PPS</option>
+                <option value="EVEN">EVEN</option>
+                <option value="GSB">Google Project Shield Bypass</option>
+                <option value="DGB">DDoS Guard Bypass</option>
+                <option value="AVB">Arvan Cloud Bypass</option>
+                <option value="CFBUAM">CloudFlare Under Attack Mode Bypass</option>
+                <option value="APACHE">Apache Exploit</option>
+                <option value="XMLRPC">WordPress XMLRPC Exploit</option>
+                <option value="BOT">Google Bot</option>
+                <option value="BOMB">Bypass with Bombardier</option>
+                <option value="DOWNLOADER">Downloader</option>
+                <option value="KILLER">Killer</option>
+                <option value="TOR">TOR Bypass</option>
+                <option value="RHEX">Random HEX</option>
+                <option value="STOMP">STOMP</option>
+            </select>
             <button type="submit">Start Attack</button>
         </form>
         <div class="log-box" id="logBox">
