@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wingate BOTNET</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <img src="logo.png" alt="Wingate BOTNET Logo" class="logo">
+        <h1>Wingate BOTNET</h1>
+        <form id="attackForm">
+            <label for="target">Target URL:</label>
+            <input type="text" id="target" name="target" placeholder="https://example.com" required>
+            <label for="delay">Packet Delay (ms):</label>
+            <input type="text" id="delay" name="delay" placeholder="200 or Z for no delay" required>
+            <button type="submit">Start Attack</button>
+        </form>
+        <div class="log-box" id="logBox">
+            <h2>Logs</h2>
+            <pre id="logs"></pre>
+        </div>
+    </div>
+    <script src="scripts/main.js"></script>
+</body>
+</html>
