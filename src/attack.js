@@ -31,6 +31,7 @@ async function sendPacket(targetUrl, proxy, delay, kbSize) {
                 port: target.port || 80,
             },
             command: 'connect',
+            timeout: 5000, 
         };
 
         SocksClient.createConnection(options, (err, info) => {
