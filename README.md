@@ -1,6 +1,3 @@
-# WingateBOTNET
-An open-source website attack on javascript, html and css
-
 # Wingate BOTNET
 
 A DDoS tool using SOCKS4 and SOCKS5 proxies.
