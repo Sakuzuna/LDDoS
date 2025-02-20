@@ -1,7 +1,7 @@
 {
   "name": "wingate-botnet",
   "version": "1.0.0",
-  "description": "Wingate BOTNET - A DDoS tool using SOCKS4 and SOCKS5 proxies.",
+  "description": "Wingate BOTNET - A DDoS tool using SOCKS4 proxies.",
   "main": "src/app.js",
   "scripts": {
     "start": "node src/app.js",
@@ -12,8 +12,7 @@
     "socks": "^2.7.1",
     "http": "^0.0.1-security",
     "fs": "^0.0.1-security",
-    "path": "^0.12.7",
-    "crypto": "^1.0.1"
+    "path": "^0.12.7"
   },
   "engines": {
     "node": "18.x"
