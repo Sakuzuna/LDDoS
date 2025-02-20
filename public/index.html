@@ -3,28 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wingate BOTNET</title>
+    <title>LDDOS-BOTNET</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <img src="logo.png" alt="Wingate BOTNET Logo" class="logo">
-        <h1>Wingate BOTNET</h1>
+        <img src="logo.gif" alt="LDDOS-BOTNET Logo" class="logo">
         <form id="attackForm">
             <label for="target">Target URL:</label>
             <input type="text" id="target" name="target" placeholder="https://example.com" required>
-            <label for="delay">Packet Delay (ms):</label>
-            <input type="text" id="delay" name="delay" placeholder="200 or Z for no delay" required>
+
+            <label for="delay">Delay:</label>
+            <input type="text" id="delay" name="delay" placeholder="milliseconds" required>
+
             <label for="kbSize">KB per Request:</label>
-            <input type="number" id="kbSize" name="kbSize" placeholder="1" required>
+            <input type="number" id="kbSize" name="kbSize" placeholder="64" required>
+
             <label for="method">Attack Method:</label>
             <select id="method" name="method" required>
                 <option value="NORMAL">Normal DDoS</option>
                 <option value="DGB">DDoS Guard Bypass</option>
                 <option value="CFB">Cloudflare Bypass</option>
             </select>
+
             <button type="submit">Start Attack</button>
         </form>
+
         <div class="log-box" id="logBox">
             <h2>Logs</h2>
             <pre id="logs"></pre>
