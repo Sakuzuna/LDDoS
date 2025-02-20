@@ -10,5 +10,5 @@ form.addEventListener('submit', async (e) => {
 
     const response = await fetch(`/attack?target=${encodeURIComponent(target)}&delay=${delay}&kbSize=${kbSize}&method=${method}`);
     const result = await response.text();
-    logBox.textContent += `Attack started on ${target} with method ${method}, delay ${delay}ms, and ${kbSize}KB payload\n`;
+    logBox.textContent += `LDS: Attack started on ${target} with method ${method}, delay ${delay}ms, and ${kbSize}KB payload\n`;
 });
