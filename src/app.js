@@ -16,5 +16,6 @@ app.get('/attack', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Wingate BOTNET running on port ${PORT}`);
+    console.log(`LDDoS BOTNET running on port ${PORT}`);
+    console.log(`Telegram channel: https://t.me/biosmosntr`);
 });
