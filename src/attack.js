@@ -26,7 +26,7 @@ async function sendPacket(targetUrl, proxy, delay, kbSize, method) {
 
         SocksClient.createConnection(options, (err, info) => {
             if (err) {
-                console.error(`Failed to connect to ${targetUrl} via ${proxy}: ${err.message}`);
+                console.error(`Failed to connect to ${targetUrl}: `);
                 reject(err);
                 return;
             }
@@ -48,9 +48,9 @@ async function sendPacket(targetUrl, proxy, delay, kbSize, method) {
 
                 req.on('error', (err) => {
                     if (err.code === 'ECONNRESET') {
-                        console.error(`Connection reset by ${proxy}. Retrying with another proxy...`);
+                        console.error(`Connection reset by ${proxy}: `);
                     } else {
-                        console.error(`Error with ${proxy}: ${err.message}`);
+                        console.error(`Error with ${proxy}: `);
                     }
                     reject(err);
                 });
@@ -70,9 +70,9 @@ function start(targetUrl, delay, kbSize, method) {
 
         sendPacket(targetUrl, proxy, delay, kbSize, method).catch((err) => {
             if (err.code === 'ECONNRESET' || err.code === 'ECONNREFUSED') {
-                console.error(`Connection error with ${proxy}: ${err.message}`);
+                console.error(`Connection error with ${proxy}: `);
             } else {
-                console.error(`Error with ${proxy}: ${err.message}`);
+                console.error(`Error with ${proxy}: `);
             }
         });
     }, delay); 
