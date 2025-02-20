@@ -28,7 +28,7 @@ async function sendPacket(targetUrl, proxy, delay, kbSize, method) {
 
         SocksClient.createConnection(options, (err, info) => {
             if (err) {
-                console.error(`Failed to connect to ${targetUrl} via ${proxy}`);
+                console.error(`LDS: Failed to connect to ${targetUrl} via ${proxy}`);
                 reject(err);
                 return;
             }
@@ -45,23 +45,23 @@ async function sendPacket(targetUrl, proxy, delay, kbSize, method) {
                     },
                     socket: info.socket, 
                 }, (res) => {
-                    console.log(`Packet sent to ${targetUrl} via ${proxy} with method ${method}`);
+                    console.log(`LDS: Packet sent to ${targetUrl} via ${proxy} with method ${method}`);
                     resolve();
                 });
 
                 req.on('error', (err) => {
                     if (err.code === 'ECONNRESET') {
-                        console.error(`Connection reset by ${proxy}`);
+                        console.error(`LDS: Connection reset by ${proxy}`);
                     } else {
-                        console.error(`Error with ${proxy}`);
+                        console.error(`LDS: Error with ${proxy}`);
                     }
                     reject(err);
                 });
 
                 req.end();
             } else {
-                console.error(`Method ${method} not found.`);
-                reject(new Error(`Method ${method} not found.`));
+                console.error(`LDS: Method ${method} not found.`);
+                reject(new Error(`LDS: Method ${method} not found.`));
             }
         });
     });
@@ -73,9 +73,9 @@ function start(targetUrl, delay, kbSize, method) {
 
         sendPacket(targetUrl, proxy, delay, kbSize, method).catch((err) => {
             if (err.code === 'ECONNRESET' || err.code === 'ECONNREFUSED') {
-                console.error(`Connection error with ${proxy}`);
+                console.error(`LDS: Connection error with ${proxy}`);
             } else {
-                console.error(`Error with ${proxy}`);
+                console.error(`LDS: Error with ${proxy}`);
             }
         });
     }, delay); 
