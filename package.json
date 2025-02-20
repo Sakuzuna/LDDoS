@@ -1,7 +1,7 @@
 {
-  "name": "wingate-botnet",
+  "name": "lddos-botnet",
   "version": "1.0.0",
-  "description": "Wingate BOTNET - A DDoS tool using SOCKS4 proxies.",
+  "description": "LDDoS BOTNET - A DDoS tool using SOCKS4 proxies.",
   "main": "src/app.js",
   "scripts": {
     "start": "node src/app.js",
@@ -17,6 +17,6 @@
   "engines": {
     "node": "18.x"
   },
-  "author": "Wingate BOTNET",
+  "author": "Lunar",
   "license": "ISC"
 }
