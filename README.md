@@ -1,4 +1,4 @@
-# Wingate BOTNET
+# LLDOS BOTNET
 
 A DDoS tool using SOCKS4 and SOCKS5 proxies.
 
