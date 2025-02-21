@@ -3,7 +3,7 @@ const { SocksClient } = require('socks');
 const layer7 = require('./methods/layer7');
 const fs = require('fs');
 
-const validSocks5Proxies = fs.readFileSync('valid_socks5.txt', 'utf8').split('\n').filter(Boolean);
+const validSocks5Proxies = fs.readFileSync('socks4.txt', 'utf8').split('\n').filter(Boolean);
 
 if (!isMainThread) {
     const { targetUrl, delay, kbSize, method } = workerData;
@@ -25,7 +25,7 @@ if (!isMainThread) {
             proxy: {
                 ipaddress: proxyIp,
                 port: parseInt(proxyPort),
-                type: 5, 
+                type: 4, 
             },
             destination: {
                 host: target.hostname,
