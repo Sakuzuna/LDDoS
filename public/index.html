@@ -8,6 +8,7 @@
 </head>
 <body>
     <div class="container">
+        <audio id="myAudio" src="sound.mp3" preload="auto"></audio>
         <img src="logo.gif" alt="LDDOS-BOTNET Logo" class="logo">
         <form id="attackForm">
             <label for="target">Target URL:</label>
@@ -34,6 +35,19 @@
             <pre id="logs"></pre>
         </div>
     </div>
+
     <script src="scripts/main.js"></script>
+    <script>
+        // Function to play the audio
+        function playAudio() {
+            var audio = document.getElementById('myAudio');
+            audio.play().catch(function(error) {
+                console.log('Audio playback failed:', error);
+            });
+        }
+
+        // Play audio when the page loads
+        window.onload = playAudio;
+    </script>
 </body>
 </html>
